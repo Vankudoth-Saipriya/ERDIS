@@ -1,1 +1,1 @@
-
+"""Core infrastructure module"""
