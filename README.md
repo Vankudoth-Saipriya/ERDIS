@@ -1,9 +1,19 @@
 # Enterprise Root-Cause & Decision Intelligence System (ERDIS)
 
-## Streamlit Portfolio Demo Dashboard
+## Live Dashboard
 
-Run locally:
+The ERDIS Portfolio Demo Dashboard is deployed as a standalone Streamlit Web Service.
 
+LIVE DASHBOARD URL: PENDING RENDER DEPLOYMENT
+
+### Render Deployment
+
+Build Command:
 ```bash
-venv\Scripts\python -m streamlit run app/dashboard.py
+pip install -r requirements-dashboard.txt
+```
+
+Start Command:
+```bash
+streamlit run app/dashboard.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
 ```

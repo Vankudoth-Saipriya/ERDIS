@@ -1,0 +1,15 @@
+# Render Deployment Configuration for ERDIS Streamlit Dashboard
+services:
+  - type: web
+    name: erdis-dashboard
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r requirements-dashboard.txt"
+    startCommand: "streamlit run app/dashboard.py --server.port $PORT --server.address 0.0.0.0 --server.headless true"
+    envVars:
+      - key: ERDIS_API_URL
+        sync: false
+        value: "http://localhost:8000"
+      - key: PYTHONUNBUFFERED
+        value: "1"
