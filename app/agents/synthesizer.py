@@ -21,15 +21,18 @@ class ExecutiveSynthesizerAgent:
     def synthesize(
         self,
         question: str,
-        sql_evidence: List[Dict[str, Any]],
-        doc_evidence: List[Dict[str, Any]],
-        critique: Dict[str, Any],
+        sql_evidence: Optional[List[Dict[str, Any]]] = None,
+        doc_evidence: Optional[List[Dict[str, Any]]] = None,
+        critique: Optional[Dict[str, Any]] = None,
         approval_status: str = "NOT_REQUIRED",
         financial_impact_usd: float = 0.0,
     ) -> ExecutiveSynthesisOutput:
         """
         Synthesizes structured final report from evidence and critique.
         """
+        sql_ev = sql_evidence or []
+        doc_ev = doc_evidence or []
+        crit = critique or {}
         if approval_status == "REJECTED":
             return ExecutiveSynthesisOutput(
                 executive_conclusion="EXECUTION REJECTED BY HUMAN OPERATOR.",
@@ -44,9 +47,9 @@ class ExecutiveSynthesizerAgent:
         prompt = (
             f"Synthesize an executive decision intelligence report:\n"
             f"User Question: {question}\n"
-            f"SQL Evidence: {sql_evidence}\n"
-            f"Document Evidence: {doc_evidence}\n"
-            f"Critique Audit: {critique}\n"
+            f"SQL Evidence: {sql_ev}\n"
+            f"Document Evidence: {doc_ev}\n"
+            f"Critique Audit: {crit}\n"
             f"Financial Impact USD: {financial_impact_usd}\n"
             f"Approval Status: {approval_status}\n"
         )
