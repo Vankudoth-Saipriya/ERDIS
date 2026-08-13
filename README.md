@@ -10,25 +10,23 @@ An enterprise-grade, evidence-grounded multi-agent reasoning system for root-cau
 
 ---
 
-## 1. Executive Overview
+## 1. Project Overview
 
-**ERDIS** is an autonomous multi-agent platform designed to diagnose complex operational failures across structured enterprise databases and unstructured legal contract repositories.
+**ERDIS (Enterprise Root-Cause & Decision Intelligence System)** is an autonomous multi-agent platform designed to diagnose complex operational failures across structured enterprise databases and unstructured legal contract repositories.
 
 ### The Problem
 When e-commerce supply chains suffer from margin erosion or surging customer refund payouts:
 - **Traditional BI Dashboards** show *what* metrics failed (e.g., $142,500 in refunds) but cannot explain *why* or cross-reference financial anomalies against legal SLA contracts.
 - **Raw LLM Chatbots** hallucinate ungrounded explanations, lack secure database connections, and risk executing destructive write commands or unapproved financial actions.
 
-### The ERDIS Solution
+### The Solution
 ERDIS bridges structured databases (PostgreSQL/SQLite) and legal documents (SLA contracts, postmortems) using **LangGraph multi-agent orchestration**, **Model Context Protocol (MCP)** tool boundaries, **SQLGlot AST security parsing**, and **hybrid dense-sparse RAG retrieval**.
 
 Every recommendation is strictly grounded in verified database rows and contract text, audited by an adversarial critic agent, and guarded by human-in-the-loop (HITL) financial safety controls.
 
-> **Resume Summary**: *Built ERDIS, an enterprise multi-agent decision intelligence system using LangGraph, MCP, SQLGlot AST validation, and hybrid RAG to automate evidence-grounded supply chain root-cause analysis with human-in-the-loop risk controls.*
-
 ---
 
-## 2. Operational Scenario
+## 2. Problem Statement & Operational Scenario
 
 An enterprise e-commerce organization experiences a **$142,500.00 USD** surge in customer refund payouts across 1,420 delayed shipments in its Midwest logistics hub. Operational leadership requires an immediate diagnosis:
 
@@ -38,7 +36,36 @@ An enterprise e-commerce organization experiences a **$142,500.00 USD** surge in
 
 ---
 
-## 3. System Architecture
+## 3. How ERDIS Works
+
+```
+User Inquiry
+    │
+    ▼
+1. Planning ───────────────► Deconstruct question into SQL & Document search targets
+    │
+    ▼
+2. Query/Data Retrieval ──► Formulate SELECT queries via SQL MCP Server (SQLGlot AST validated)
+    │
+    ▼
+3. Document Retrieval ────► Perform BM25 + Qdrant Vector search with FlashRank RRF reranking
+    │
+    ▼
+4. Analysis & Aggregation ► Construct immutable claim-to-evidence graph
+    │
+    ▼
+5. Critic Audit ──────────► Audit claims for evidence grounding (Groundedness >= 0.70)
+    │
+    ▼
+6. Risk Assessment ───────► Interrupt graph execution if financial risk > $100k USD
+    │
+    ▼
+7. Executive Synthesis ───► Synthesize grounded decision report from verified evidence
+```
+
+---
+
+## 4. System Architecture
 
 ```mermaid
 flowchart TD
@@ -74,7 +101,7 @@ flowchart TD
 
 ---
 
-## 4. Multi-Agent Architecture
+## 5. Multi-Agent Architecture
 
 ERDIS separates complex reasoning into **five specialized autonomous agents** operating alongside **four deterministic control nodes**.
 
@@ -96,7 +123,7 @@ ERDIS separates complex reasoning into **five specialized autonomous agents** op
 
 ---
 
-## 5. LangGraph Workflow & Circuit Breakers
+## 6. LangGraph Workflow & Circuit Breakers
 
 The execution pipeline is constructed as a cyclic `StateGraph` using **LangGraph**:
 
@@ -121,7 +148,7 @@ flowchart LR
     Synth --> End([Executive Report])
 ```
 
-### Circuit Breakers & Budget Limits
+### Circuit Breakers & Safety Budget Limits
 - **Max Loop Retries**: Hard limit of **2** critic audit loops.
 - **Max Tool Calls**: Hard limit of **10** tool calls per investigation.
 - **Max Token Budget**: Hard limit of **60,000** tokens.
@@ -129,16 +156,16 @@ flowchart LR
 
 ---
 
-## 6. Model Context Protocol (MCP) Architecture
+## 7. Model Context Protocol (MCP) Architecture
 
-ERDIS uses the **Model Context Protocol (MCP)** to establish clean security boundaries between autonomous agent logic and backend data stores:
+ERDIS uses the **Model Context Protocol (MCP)** to establish clean process boundaries between autonomous agent logic and backend data stores:
 
 - **MCP SQL Server** (`app/mcp/sql_server.py`): Exposes schema inspection and query execution tools over standard JSON-RPC protocol.
 - **MCP Document Server** (`app/mcp/document_server.py`): Exposes hybrid document search and document metadata tools.
 
 ---
 
-## 7. Deterministic SQL Security
+## 8. Deterministic SQL Security
 
 To eliminate SQL injection and accidental database modification, ERDIS implements a deterministic **SQLGlot AST Security Validation Engine** (`app/mcp/sql_validator.py`):
 
@@ -151,7 +178,7 @@ To eliminate SQL injection and accidental database modification, ERDIS implement
 
 ---
 
-## 8. Hybrid RAG Pipeline
+## 9. Hybrid RAG Pipeline
 
 ERDIS utilizes a multi-stage **Hybrid Retrieval Architecture** (`app/rag/`) optimized for legal SLA contracts and operational logs:
 
@@ -163,7 +190,13 @@ ERDIS utilizes a multi-stage **Hybrid Retrieval Architecture** (`app/rag/`) opti
 
 ---
 
-## 9. Human-in-the-Loop (HITL) Safety Gate
+## 10. Evidence-Grounded Reasoning
+
+ERDIS enforces strict evidence grounding through formal schemas (`app/schemas/task.py`, `app/graph/nodes.py`). Statements are classified into verified evidence and unverified inferences. All synthesized citations are strictly audited against source reference strings in SQL and document evidence.
+
+---
+
+## 11. Human-in-the-Loop (HITL) Safety Gate
 
 High-stakes operational recommendations should never execute autonomously:
 
@@ -186,7 +219,20 @@ Human operators review risk metrics on the Streamlit dashboard or via `POST /api
 
 ---
 
-## 10. Streamlit Control Dashboard
+## 12. Financial Impact & Decision Layer
+
+Operational findings are consolidated into a structured executive report:
+1. **Executive Conclusion**: Root-cause summary.
+2. **Key Findings**: Factually verified metrics and contract terms.
+3. **Root Cause Analysis**: Identified operational driver.
+4. **Financial Impact (USD)**: Net quantitative exposure.
+5. **Recommended Actions**: Prioritized operational mitigations.
+6. **Model Inferences & Assumptions**: Explicitly segregated unverified hypotheses.
+7. **Citations**: Verifiable SQL query strings and contract chunk anchors.
+
+---
+
+## 13. Streamlit Control Dashboard
 
 The Streamlit interface (`app/dashboard.py`) acts as a real-time observation and control center connected to the FastAPI backend, offering six dedicated views:
 
@@ -199,7 +245,7 @@ The Streamlit interface (`app/dashboard.py`) acts as a real-time observation and
 
 ---
 
-## 11. Evaluation & Benchmarks
+## 14. Evaluation & Benchmarks
 
 ERDIS includes an automated evaluation framework (`app/eval/`) with **30 benchmark scenarios** covering SQL metrics, Document SLA contracts, dual-source queries, and edge cases.
 
@@ -213,7 +259,19 @@ Evaluation comparing graph execution with vs without the Adversarial Critic Agen
 
 ---
 
-## 12. Technology Stack
+## 15. Security Overview
+
+1. **SQL AST Validation Engine**: SQLGlot AST parsing enforces SELECT-only execution and blocks multi-statement injection.
+2. **Table Allowlisting**: Restricts database queries strictly to 6 authorized operational tables.
+3. **Read-Only Database Credentials**: Database engine connects via read-only role permissions.
+4. **Untrusted Data Framing**: Document chunks are framed inside `<UNTRUSTED_DOCUMENT>` tags to block prompt injection.
+5. **Adversarial Critic Gate**: Rejects ungrounded claims before report synthesis.
+6. **Circuit Breakers**: Enforces strict execution time, token, and iteration budgets.
+7. **HITL Risk Controls**: Restricts automatic execution of high-risk financial recommendations.
+
+---
+
+## 16. Technology Stack
 
 | Layer | Technologies Used |
 | :--- | :--- |
@@ -226,7 +284,7 @@ Evaluation comparing graph execution with vs without the Adversarial Critic Agen
 
 ---
 
-## 13. Project Structure
+## 17. Project Structure
 
 ```
 ERDIS/
@@ -249,7 +307,7 @@ ERDIS/
 
 ---
 
-## 14. Running Locally & Testing
+## 18. Running Locally & Testing
 
 ### 1. Environment Setup
 ```bash
@@ -282,15 +340,26 @@ pytest -v
 
 ---
 
-## 15. Resume Bullet Points & Interview Talking Points
+## 19. Key Engineering Decisions
 
-### ATS Resume Bullets
-- *Engineered ERDIS, an enterprise multi-agent decision intelligence system in Python using LangGraph, FastAPI, and Streamlit, automating supply chain root-cause analysis across transactional databases and contract repositories.*
-- *Designed a secure Model Context Protocol (MCP) architecture featuring SQLGlot AST parsing for read-only SQL enforcement, hybrid BM25 + Qdrant dense vector retrieval with FlashRank RRF reranking, and an adversarial critic agent that improved report groundedness from 68% to 94%.*
-- *Implemented human-in-the-loop (HITL) risk controls with state interrupts for high-stakes recommendations (> $100k USD) and validated system reliability across 30 automated benchmark scenarios with 116 passing unit and integration tests.*
+| Decision | Choice Made | Rationale |
+| :--- | :--- | :--- |
+| **Multi-Agent vs Single-Agent** | 5 Specialized Agents | Isolates planning, SQL generation, document search, and critique into focused system prompts. |
+| **Graph Framework** | LangGraph StateGraph | Supports stateful cyclic retries and native `interrupt()` for human approval. |
+| **Tool Boundary** | Model Context Protocol (MCP) | Process isolation separating reasoning agents from database drivers and vector stores. |
+| **RAG Engine** | Hybrid Dense + Sparse + RRF | Dense search captures semantic intent; sparse BM25 matches exact clause numbers. |
+| **SQL Safety** | SQLGlot AST Parsing | Structural parsing guarantees strict SELECT-only execution and table allowlist enforcement. |
 
-### Key Interview Talking Points
-- **Architecture**: "ERDIS uses 5 specialized agents coordinated by a cyclic LangGraph StateGraph, separating query planning, SQL generation, document search, critic auditing, and executive synthesis."
-- **SQL Security**: "Rather than fragile regex checks, we parse SQL queries into Abstract Syntax Trees via SQLGlot to guarantee strict SELECT-only execution and table allowlist enforcement."
-- **Hybrid RAG**: "We combine Qdrant dense vector search for semantic context and BM25 sparse search for exact clause numbers, reranking candidates with FlashRank cross-encoders."
-- **Human-in-the-Loop**: "When financial risk exceeds $100,000 USD, LangGraph native `interrupt()` halts execution until an executive operator approves or rejects the recommendation via REST API."
+---
+
+## 20. Limitations
+
+1. **Authentication Scope**: Relies on network-level security; production requires JWT/OAuth2.
+2. **Local Vector Store Fallback**: In environments lacking live Qdrant, degrades to in-memory vector search.
+3. **Stateless REST Approvals**: Task approvals stored locally; scaling requires PostgreSQL-backed checkpointers.
+
+---
+
+## 21. Conclusion
+
+ERDIS demonstrates how modern multi-agent orchestration, tool isolation protocols, and formal verification gates transform fragmented operational data into trustworthy decision intelligence. By grounding every executive insight in audited SQL database metrics and legal contract text, ERDIS provides leadership with transparent, evidence-backed operational diagnoses.
