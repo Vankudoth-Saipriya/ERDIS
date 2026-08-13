@@ -76,8 +76,14 @@ class TaskResponse(BaseSchema):
     token_usage: Dict[str, int] = Field(default_factory=dict, description="Token consumption metrics.")
     errors: List[str] = Field(default_factory=list, description="Execution errors or circuit breaker warnings.")
 
+    sql_evidence: List[Dict[str, Any]] = Field(default_factory=list, description="Structured SQL execution evidence.")
+    document_evidence: List[Dict[str, Any]] = Field(default_factory=list, description="Retrieved document RAG excerpts.")
+    claims: List[Dict[str, Any]] = Field(default_factory=list, description="Claims and verification statuses.")
+    critique_findings: List[Dict[str, Any]] = Field(default_factory=list, description="Adversarial critic findings.")
+
     created_at: str = Field(..., description="Task creation ISO timestamp.")
     updated_at: str = Field(..., description="Task last update ISO timestamp.")
+
 
 
 class HealthResponse(BaseSchema):

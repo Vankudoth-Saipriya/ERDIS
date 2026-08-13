@@ -8,7 +8,7 @@ from typing import Dict, Any, Literal, Optional
 SQL_KEYWORDS = {
     "revenue", "margin", "sales", "order", "orders", "cost", "refund", "refunds",
     "amount", "count", "sum", "average", "total", "database", "table", "sql",
-    "profit", "shipping_cost", "volume", "discounts",
+    "profit", "shipping_cost", "volume", "discounts", "financial", "risk",
 }
 
 DOC_KEYWORDS = {

@@ -115,56 +115,120 @@ class MockLLMProvider(BaseLLMProvider):
             }
 
         elif schema_name == "SQLAnalysisOutput":
-            mock_data = {
-                "executed_sql": "SELECT region, SUM(refund_amount) FROM orders WHERE region='Midwest';",
-                "summary": "Midwest region incurred $42,500 in customer refund payouts due to delayed deliveries.",
-                "metrics": {"refund_amount": 42500.0, "delayed_orders": 142},
-                "insufficient_data": False,
-            }
+            if "refund" in p_lower or "midwest" in p_lower:
+                mock_data = {
+                    "executed_sql": "SELECT region, SUM(refund_amount) FROM orders WHERE region='Midwest';",
+                    "summary": "Midwest region incurred $42,500 in customer refund payouts due to delayed deliveries.",
+                    "metrics": {"refund_amount": 42500.0, "delayed_orders": 142},
+                    "insufficient_data": False,
+                }
+            elif "sorter" in p_lower or "outage" in p_lower:
+                mock_data = {
+                    "executed_sql": "SELECT system_id, downtime_hours, repair_cost FROM equipment_logs WHERE system_id='SORTER-MW-01';",
+                    "summary": "Automated sorter unit SORTER-MW-01 was offline for 48 hours, causing 1,420 delayed shipments.",
+                    "metrics": {"downtime_hours": 48.0, "delayed_shipments": 1420, "repair_cost": 15000.0},
+                    "insufficient_data": False,
+                }
+            else:
+                mock_data = {
+                    "executed_sql": "SELECT carrier_id, on_time_pct, total_shipments FROM carrier_metrics WHERE carrier_id='CARRIER-X';",
+                    "summary": "Carrier X achieved 88.2% on-time delivery rate against 90.0% required SLA threshold.",
+                    "metrics": {"on_time_pct": 88.2, "required_pct": 90.0, "total_shipments": 3200},
+                    "insufficient_data": False,
+                }
 
         elif schema_name == "DocumentAnalysisOutput":
-            mock_data = {
-                "search_query": "carrier SLA penalty delay",
-                "retrieved_chunks_summary": "Carrier X contract specifies a 15% rate penalty for on-time delivery below 90%.",
-                "citations": ["carrier_logistics_x_sla_contract_2025.md#p1"],
-                "insufficient_evidence": False,
-            }
-
-        elif schema_name == "CritiqueOutput":
-            # Simulate retry if prompt contains explicit empty or missing flag
-            retry = "requery" in p_lower or "empty" in p_lower
-            mock_data = {
-                "supported_claims": ["Midwest warehouse logistics delay resulted in customer refund payouts."],
-                "unsupported_claims": [],
-                "contradictions": [],
-                "missing_evidence": ["Exact delivery timestamp log details."] if retry else [],
-                "recommended_followup": ["Verify carrier SLA penalty clause application."],
-                "retry_needed": retry,
-                "confidence_score": 0.92,
-            }
+            if "sla" in p_lower or "carrier" in p_lower or "breach" in p_lower:
+                mock_data = {
+                    "search_query": "carrier SLA penalty delay",
+                    "retrieved_chunks_summary": "Carrier X contract specifies a 15% rate penalty for on-time delivery below 90.0% under Clause 4.2.",
+                    "citations": ["carrier_logistics_x_sla_contract_2025.md#p1"],
+                    "insufficient_evidence": False,
+                }
+            elif "sorter" in p_lower or "postmortem" in p_lower:
+                mock_data = {
+                    "search_query": "automated sorter postmortem failure",
+                    "retrieved_chunks_summary": "Q3 postmortem report indicates sorter software bug caused 48-hour sorting blockage in Midwest Hub.",
+                    "citations": ["midwest_warehouse_q3_postmortem.md#p2"],
+                    "insufficient_evidence": False,
+                }
+            else:
+                mock_data = {
+                    "search_query": "customer refund policy 2025",
+                    "retrieved_chunks_summary": "Refund policy guarantees 100% payout for shipments delayed beyond 48 hours due to operational errors.",
+                    "citations": ["customer_refund_policy_2025.md#p1"],
+                    "insufficient_evidence": False,
+                }
 
         elif schema_name == "ExecutiveSynthesisOutput":
-            mock_data = {
-                "executive_conclusion": "Root-cause analysis confirms Midwest margin erosion was driven by carrier SLA delays.",
-                "key_findings": [
-                    "Midwest hub incurred $42,500 in refund payouts across 142 delayed orders.",
-                    "Carrier X on-time performance dropped to 88%, violating the 90% SLA threshold.",
-                ],
-                "root_cause_analysis": "Primary root cause: Midwest warehouse dispatch bottleneck combined with Carrier X fleet delay.",
-                "business_impact_usd": 142500.0 if ("100k" in p_lower or "high" in p_lower or "142500" in p_lower) else 42500.0,
-                "recommended_actions": [
-                    "Enforce 15% rate penalty clause under Section 4.2 of Carrier X SLA Agreement.",
-                    "Reallocate Q4 Midwest fulfillment volume to regional carrier backup.",
-                ],
-                "model_inferences_and_assumptions": [
-                    "Read-only SQL metrics verified against orders database.",
-                    "Contractual terms extracted from verified Carrier X SLA Agreement.",
-                ],
-                "citations": [
-                    "SELECT region, SUM(refund_amount) FROM orders WHERE region='Midwest'",
-                    "carrier_logistics_x_sla_contract_2025.md#p1",
-                ],
-            }
+            if "sorter" in p_lower or "outage" in p_lower or "142500" in p_lower or "high" in p_lower or "100k" in p_lower or "risk" in p_lower:
+                mock_data = {
+                    "executive_conclusion": "Root-cause analysis confirms automated sorter failure compounded by carrier delays created $142,500.00 in total financial exposure.",
+                    "key_findings": [
+                        "Automated sorter SORTER-MW-01 suffered a 48-hour software control failure in Midwest Hub Alpha.",
+                        "Total refund payouts and backlog resolution costs reached $142,500.00 USD, requiring HITL authorization.",
+                        "Carrier X delivery performance dropped to 88.2%, violating Section 4.1 SLA terms.",
+                    ],
+                    "root_cause_analysis": "Unscheduled hardware sorter failure caused a 48-hour sorting backlog, exacerbating carrier SLA delays and triggering customer refund payouts.",
+                    "business_impact_usd": 142500.0,
+                    "recommended_actions": [
+                        "Approve emergency $142,500 sorter control unit replacement and hardware redundancy installation.",
+                        "Enforce Section 4.2 penalty clause against Carrier X to recover $21,375 in rate credits.",
+                    ],
+                    "model_inferences_and_assumptions": [
+                        "Equipment downtime verified against SQL equipment logs.",
+                        "Contractual penalty percentage derived from Carrier X 2025 SLA agreement.",
+                    ],
+                    "citations": [
+                        "SELECT system_id, downtime_hours FROM equipment_logs WHERE system_id='SORTER-MW-01'",
+                        "midwest_warehouse_q3_postmortem.md#p2",
+                        "carrier_logistics_x_sla_contract_2025.md#p1",
+                    ],
+                }
+            elif "sla" in p_lower or "breach" in p_lower or "carrier" in p_lower:
+                mock_data = {
+                    "executive_conclusion": "Document and metric audit confirms Carrier Logistics X breached Section 4.1 delivery SLA with an on-time rate of 88.2%.",
+                    "key_findings": [
+                        "Carrier X on-time delivery dropped to 88.2% in Q3, breaching the 90.0% contractual requirement.",
+                        "Section 4.2 penalty clause entitles ERDIS to a 15% rate credit on Q3 billing invoices.",
+                    ],
+                    "root_cause_analysis": "Carrier X fleet capacity shortages in Q3 caused delivery delays violating Clause 4.1 SLA guarantees.",
+                    "business_impact_usd": 50000.0,
+                    "recommended_actions": [
+                        "Issue formal SLA breach notice under Section 4.2 of Carrier X SLA Agreement.",
+                        "Claim 15% contractual rate credit ($50,000 liability cap) on Q3 logistics invoices.",
+                    ],
+                    "model_inferences_and_assumptions": [
+                        "Carrier on-time metrics verified against logistics performance database.",
+                        "SLA terms verified against active 2025 Carrier X contract.",
+                    ],
+                    "citations": [
+                        "SELECT carrier_id, on_time_pct FROM carrier_metrics WHERE carrier_id='CARRIER-X'",
+                        "carrier_logistics_x_sla_contract_2025.md#p1",
+                    ],
+                }
+            else:
+                mock_data = {
+                    "executive_conclusion": "Root-cause analysis confirms Midwest customer refund payouts totaled $42,500.00 across 142 orders due to dispatch bottlenecks.",
+                    "key_findings": [
+                        "Midwest hub incurred $42,500 in refund payouts across 142 delayed orders.",
+                        "Refund policy threshold applied automatically for orders delayed >48 hours.",
+                    ],
+                    "root_cause_analysis": "Midwest regional warehouse dispatch backlog triggered automated customer refund payouts under 2025 customer policy.",
+                    "business_impact_usd": 42500.0,
+                    "recommended_actions": [
+                        "Rebalance Midwest warehouse dispatch shift capacity.",
+                        "Process vendor credit recovery for delayed Midwest fulfillment.",
+                    ],
+                    "model_inferences_and_assumptions": [
+                        "Read-only SQL metrics verified against orders database.",
+                        "Customer refund terms extracted from 2025 policy document.",
+                    ],
+                    "citations": [
+                        "SELECT region, SUM(refund_amount) FROM orders WHERE region='Midwest'",
+                        "customer_refund_policy_2025.md#p1",
+                    ],
+                }
         else:
             # Fallback default empty model
             mock_data = {}

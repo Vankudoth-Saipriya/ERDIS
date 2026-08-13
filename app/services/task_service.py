@@ -73,7 +73,12 @@ class TaskService:
             "recommended_actions": [],
             "model_inferences_and_assumptions": [],
             "citations": [],
+            "sql_evidence": [],
+            "document_evidence": [],
+            "claims": [],
+            "critique_findings": [],
             "financial_impact_usd": 0.0,
+
             "approval_status": "NOT_REQUIRED",
             "execution_time_ms": 0.0,
             "node_trajectory": ["orchestrator_node"],
@@ -192,6 +197,11 @@ class TaskService:
         record["errors"] = res.get("errors", [])
         record["citations"] = res.get("citations", [])
         record["model_inferences_and_assumptions"] = res.get("assumptions", [])
+        record["sql_evidence"] = res.get("sql_evidence", [])
+        record["document_evidence"] = res.get("document_evidence", [])
+        record["claims"] = res.get("claims", [])
+        record["critique_findings"] = res.get("critique_findings", [])
+
 
         # Parse final answer into structured sections
         final_ans = res.get("final_answer", "")
