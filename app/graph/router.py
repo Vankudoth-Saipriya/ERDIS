@@ -38,6 +38,10 @@ def determine_route(
     has_sql = any(kw in q_lower for kw in SQL_KEYWORDS)
     has_doc = any(kw in q_lower for kw in DOC_KEYWORDS)
 
+    # Carrier SLA breach inquiries require both performance metrics (SQL) and contract terms (Doc)
+    if ("carrier" in q_lower or "sla" in q_lower) and ("breach" in q_lower or "did the carrier" in q_lower):
+        return "both"
+
     if has_sql and has_doc:
         return "both"
     elif has_sql:

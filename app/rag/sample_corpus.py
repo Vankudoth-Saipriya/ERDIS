@@ -83,4 +83,20 @@ SAMPLE_ENTERPRISE_DOCUMENTS: List[Dict[str, Any]] = [
             "refund upon request."
         ),
     },
+    {
+        "filename": "force_majeure_clause_policy.md",
+        "category": "policies",
+        "doc_id": "DOC-POLICY-FORCE-MAJEURE",
+        "effective_date": "2025-01-01",
+        "content": (
+            "# FORCE MAJEURE EXCEPTIONS AND POLICY 2025\n"
+            "Effective Date: 2025-01-01 | Version: 1.2\n\n"
+            "## SECTION 8.1 FORCE MAJEURE DEFINITION\n"
+            "Force Majeure events are strictly defined as unpreventable natural disasters, declared wars, "
+            "and government-mandated emergency shutdowns.\n\n"
+            "## SECTION 8.3 EXCLUSIONS AND NON-QUALIFYING EVENTS\n"
+            "Equipment software glitches, internal sorter outages, predictable maintenance delays, and regional "
+            "carrier capacity shortages DO NOT qualify as Force Majeure events and do not excuse SLA compliance."
+        ),
+    },
 ]

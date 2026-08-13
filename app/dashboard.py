@@ -272,7 +272,7 @@ def render_dashboard():
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        body, p, span, label, div, h1, h2, h3, h4, h5, h6, .stMarkdown {
+        .stApp, .stMarkdown, .stMarkdown p, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6, [data-testid="stHeader"], label {
             color: #F0F6FC !important;
         }
 
@@ -477,6 +477,16 @@ def render_dashboard():
         live_data = fetch_task_from_api(active_id)
         if live_data:
             st.session_state["current_task_data"] = live_data
+            curr_status = live_data.get("status")
+            if curr_status in {"PENDING", "RUNNING"}:
+                with st.spinner(f"⏱️ Monitoring Live ERDIS Multi-Agent Graph Execution... (Task: `{active_id}`)"):
+                    for _ in range(20):
+                        time.sleep(1.5)
+                        poll_data = fetch_task_from_api(active_id)
+                        if poll_data:
+                            st.session_state["current_task_data"] = poll_data
+                            if poll_data.get("status") in {"COMPLETED", "WAITING_FOR_APPROVAL", "REJECTED", "FAILED"}:
+                                break
 
     task_data = st.session_state.get("current_task_data")
 
@@ -601,6 +611,17 @@ def render_dashboard():
                                     st.session_state["active_task_id"] = new_task_id
                                     st.session_state["current_task_data"] = task_info
                                     st.success(f"Live Task Created: `{new_task_id}`")
+
+                                    # Active Polling Loop until graph execution reaches terminal state
+                                    with st.spinner(f"⏱️ ERDIS Multi-Agent Graph Execution in Progress... (Task: `{new_task_id}`)"):
+                                        for _ in range(25):
+                                            time.sleep(1.5)
+                                            poll_data = fetch_task_from_api(new_task_id)
+                                            if poll_data:
+                                                st.session_state["current_task_data"] = poll_data
+                                                if poll_data.get("status") in {"COMPLETED", "WAITING_FOR_APPROVAL", "REJECTED", "FAILED"}:
+                                                    break
+
                                     st.rerun()
                                 else:
                                     st.error(f"Backend API Error ({res.status_code}): {res.text}")
@@ -629,6 +650,10 @@ def render_dashboard():
             conc_text = task_data.get("executive_conclusion")
             if conc_text:
                 st.info(conc_text)
+            elif task_data.get("status") in {"PENDING", "RUNNING"}:
+                st.warning("⏱️ Multi-agent investigation in progress... Click 'Refresh Task Status' or wait for completion.")
+                if st.button("🔄 Refresh Task Status", key="refresh_task_status_btn"):
+                    st.rerun()
             else:
                 st.warning("No data returned for this task.")
 

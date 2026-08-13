@@ -372,6 +372,43 @@ def risk_assessment_hitl_node(state: GraphState) -> Dict[str, Any]:
     }
 
 
+def filter_grounded_citations(
+    citations: List[str],
+    sql_evidence: List[Dict[str, Any]],
+    doc_evidence: List[Dict[str, Any]],
+) -> List[str]:
+    """
+    Enforces strict citation grounding.
+    Filters raw citations list to include ONLY strings that correspond to retrieved evidence items.
+    """
+    valid_refs = set()
+    for ev in sql_evidence:
+        if ev.get("source_ref"):
+            valid_refs.add(ev["source_ref"].strip())
+        content = ev.get("content", {})
+        if isinstance(content, dict) and content.get("query"):
+            valid_refs.add(content["query"].strip())
+    for ev in doc_evidence:
+        if ev.get("source_ref"):
+            valid_refs.add(ev["source_ref"].strip())
+        content = ev.get("content", {})
+        if isinstance(content, dict):
+            for c in content.get("citations", []):
+                valid_refs.add(c.strip())
+
+    grounded = []
+    for c in citations:
+        c_clean = c.strip()
+        if c_clean in valid_refs:
+            if c_clean not in grounded:
+                grounded.append(c_clean)
+
+    if not grounded and valid_refs:
+        grounded = sorted(list(valid_refs))
+
+    return grounded
+
+
 def executive_synthesizer_agent_node(state: GraphState) -> Dict[str, Any]:
     """
     Invokes ExecutiveSynthesizerAgent to generate final decision report.
@@ -384,6 +421,7 @@ def executive_synthesizer_agent_node(state: GraphState) -> Dict[str, Any]:
     errors = state.get("errors", [])
     sql_ev = state.get("sql_evidence", [])
     doc_ev = state.get("document_evidence", [])
+    fin_impact = state.get("financial_impact_usd", 0.0)
 
     if status == "REJECTED":
         final_ans = "EXECUTION REJECTED BY HUMAN OPERATOR: Recommendation involved high financial impact exceeding safety thresholds."
@@ -405,12 +443,14 @@ def executive_synthesizer_agent_node(state: GraphState) -> Dict[str, Any]:
             doc_evidence=doc_ev,
             critique={"findings": state.get("critique_findings", [])},
             approval_status=status,
-            financial_impact_usd=state.get("financial_impact_usd", 0.0),
+            financial_impact_usd=fin_impact,
         )
 
-        citations = synth_out.citations
-        if not citations:
-            citations = [e.get("source_ref", "") for e in (sql_ev + doc_ev) if e.get("source_ref")]
+        if synth_out.business_impact_usd > 0:
+            fin_impact = float(synth_out.business_impact_usd)
+
+        # Enforce strict citation grounding against actual retrieved evidence
+        citations = filter_grounded_citations(synth_out.citations, sql_ev, doc_ev)
 
         assumptions = synth_out.model_inferences_and_assumptions
         if not assumptions:
@@ -436,6 +476,7 @@ def executive_synthesizer_agent_node(state: GraphState) -> Dict[str, Any]:
         "final_answer": final_ans,
         "citations": citations,
         "assumptions": assumptions,
+        "financial_impact_usd": fin_impact,
         "execution_time_ms": elapsed_ms,
         "node_history": history,
     }
