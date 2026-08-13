@@ -21,12 +21,26 @@ import streamlit as st
 # ==============================================================================
 # API CONFIGURATION & HEALTH PROBES (Importable top-level symbols)
 # ==============================================================================
-API_BASE_URL = os.getenv("ERDIS_API_URL", "http://localhost:8000")
+def get_api_base_url() -> str:
+    """Resolves target API base URL from st.secrets, environment variables, or default public Render URL."""
+    if st.runtime.exists():
+        try:
+            if "ERDIS_API_URL" in st.secrets:
+                return st.secrets["ERDIS_API_URL"].rstrip("/")
+        except Exception:
+            pass
+    env_url = os.getenv("ERDIS_API_URL")
+    if env_url:
+        return env_url.rstrip("/")
+    return "https://erdis.onrender.com"
+
+
+API_BASE_URL = get_api_base_url()
 
 
 def get_api_client():
     """Returns configured HTTP client targeting ERDIS FastAPI backend."""
-    return httpx.Client(base_url=API_BASE_URL, timeout=15.0)
+    return httpx.Client(base_url=get_api_base_url(), timeout=30.0)
 
 
 def check_backend_status():
@@ -272,27 +286,68 @@ def render_dashboard():
         }
 
         /* Input Controls: Selectbox, Text Input, Text Area */
-        div[data-baseweb="select"] > div, input, textarea {
+        div[data-baseweb="select"],
+        div[data-baseweb="select"] > div,
+        input,
+        textarea {
             background-color: #21262D !important;
             color: #F0F6FC !important;
             border: 1px solid #30363D !important;
             border-radius: 6px !important;
         }
-        div[data-baseweb="select"] span {
+        div[data-baseweb="select"] *,
+        div[data-baseweb="select"] span,
+        div[data-baseweb="select"] input {
+            color: #F0F6FC !important;
+            fill: #F0F6FC !important;
+        }
+
+        /* Dropdown Popup Overlay & Listbox Container */
+        div[data-baseweb="popover"],
+        div[data-baseweb="menu"],
+        ul[data-baseweb="menu"],
+        ul[role="listbox"],
+        div[role="listbox"] {
+            background-color: #161B22 !important;
+            border: 1px solid #30363D !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+            border-radius: 6px !important;
+        }
+
+        /* BaseWeb Select Options (Default State) */
+        li[data-baseweb="option"],
+        div[role="option"],
+        li[role="option"] {
+            background-color: #161B22 !important;
+            color: #F0F6FC !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            padding: 8px 12px !important;
+        }
+        li[data-baseweb="option"] *,
+        div[role="option"] *,
+        li[role="option"] * {
+            background-color: transparent !important;
             color: #F0F6FC !important;
         }
 
-        /* Dropdown Popup Menu Items */
-        ul[data-baseweb="menu"], div[data-baseweb="popover"], div[aria-label="dropdown menu"] {
-            background-color: #161B22 !important;
-            border: 1px solid #30363D !important;
-        }
-        li[data-baseweb="option"] {
-            background-color: #161B22 !important;
-            color: #F0F6FC !important;
-        }
-        li[data-baseweb="option"]:hover, li[data-baseweb="option"][aria-selected="true"] {
+        /* BaseWeb Select Options (Hover & Selected States) */
+        li[data-baseweb="option"]:hover,
+        li[data-baseweb="option"][aria-selected="true"],
+        div[role="option"]:hover,
+        div[role="option"][aria-selected="true"],
+        li[role="option"]:hover,
+        li[role="option"][aria-selected="true"] {
             background-color: #1F6FEB !important;
+            color: #FFFFFF !important;
+        }
+        li[data-baseweb="option"]:hover *,
+        li[data-baseweb="option"][aria-selected="true"] *,
+        div[role="option"]:hover *,
+        div[role="option"][aria-selected="true"] *,
+        li[role="option"]:hover *,
+        li[role="option"][aria-selected="true"] * {
+            background-color: transparent !important;
             color: #FFFFFF !important;
         }
 
@@ -343,10 +398,31 @@ def render_dashboard():
             color: #F0F6FC !important;
         }
 
-        /* Helper Subtext */
-        .subtext {
+        /* Helper Subtext & Captions */
+        .subtext, small, .stCaption {
             color: #8B949E !important;
             font-size: 14px;
+        }
+
+        /* Metrics Styling */
+        div[data-testid="stMetricValue"] * {
+            color: #58A6FF !important;
+            font-weight: 700 !important;
+        }
+        div[data-testid="stMetricLabel"] * {
+            color: #8B949E !important;
+            font-size: 14px !important;
+        }
+
+        /* Code Blocks & Dataframes */
+        code, pre {
+            color: #58A6FF !important;
+            background-color: #161B22 !important;
+            border: 1px solid #30363D !important;
+        }
+        div[data-testid="stDataFrame"] * {
+            color: #F0F6FC !important;
+            background-color: #161B22 !important;
         }
         </style>
         """,
